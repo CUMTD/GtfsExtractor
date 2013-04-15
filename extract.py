@@ -2,7 +2,7 @@
 
 # GTFS Extractor
 #
-# Given a GTFS feed and one or more routes, extracts a smaller GTFS feed that
+# Given a GTFS feed and a list of routes, extracts a smaller GTFS feed that
 # contains only the information needed for those routes
 #
 # (c) 2013, Champaign-Urbana Mass Transit District
@@ -74,7 +74,9 @@ if args[1] == '--verbose':
 
 input_directory = normalize_path(args[1])
 output_directory = normalize_path(args[2])
+
 routes = set(args[3:])
+debug('Using routes "%s"' % '", "'.join(list(routes)))
 
 # create the output directory
 
@@ -82,8 +84,14 @@ if not os.path.exists(output_directory):
 	debug('Creating the directory "%s"' % output_directory)
 	os.mkdir(output_directory)
 
-debug('Copying agency.txt')
-shutil.copy(input_directory + 'agency.txt', output_directory)
+files_to_copy = ['agency.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'feed_info.txt']
+
+for f in files_to_copy:
+	debug('Copying %s' % f)
+	try:
+		shutil.copy(input_directory + f, output_directory)
+	except IOError as e:
+		debug('    There is no %s in the input' % f)
 
 
 # go through the files
