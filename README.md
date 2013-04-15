@@ -1,8 +1,24 @@
+# GtfsExtractor
+
+Given a GTFS feed and a list of route IDs, this script generates a (presumably smaller) GTFS feed that contains the data only for those routes. (For example, the generated `stops.txt` will contain only the stops for the routes you've specified.)
+
+## Usage
+
+`extractor.py input_directory output_directory route_id [route_id ...]`
+
+where
+
+* `input_directory` is a directory containing your GTFS files.
+* `output_directory` is where the new files will be written. This directory will be created if it doesn't exist.
+* the `route_id` arguments correspond to the `route_id` keys from the `routes.txt` file for which information should be kept.
+
+The script has only been tested with Python 2.7, but is probably compatible with other versions of Python. For known issues, see the "Issues" tab on the GitHub project page.
+
+## License
+
 Copyright (c) 2013, Champaign-Urbana Mass Transit District. All rights reserved.
 
-Developed by: Benjamin Esham
-              Champaign-Urbana Mass Transit District
-              http://www.cumtd.com
+Developed by: Benjamin Esham, [Champaign-Urbana Mass Transit District](http://www.cumtd.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal with

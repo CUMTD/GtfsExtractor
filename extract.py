@@ -6,7 +6,7 @@
 # contains only the information needed for those routes
 #
 # (c) 2013, Champaign-Urbana Mass Transit District
-# See the accompanying LICENSE.txt for more information
+# See the "License" section in the accompanying README.md for more information.
 
 import os, sys, shutil, re, argparse
 from os.path import abspath, expanduser
