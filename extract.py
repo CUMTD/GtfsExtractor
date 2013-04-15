@@ -8,10 +8,11 @@
 # (c) 2013, Champaign-Urbana Mass Transit District
 # See the accompanying LICENSE.txt for more information
 
-import os, sys, shutil, re
+import os, sys, shutil, re, argparse
 from os.path import abspath, expanduser
 
 script_version = '0.8'
+verbose = False
 
 
 # utility functions
@@ -30,52 +31,29 @@ def debug(text):
 	if verbose:
 		print >> sys.stderr, text
 
-# print help information
-
-def version_text():
-	old_out = sys.stdout
-	sys.stdout = sys.stderr
-
-	print 'GTFS Extractor %s' % script_version
-	print 'https://github.com/cumtd/gtfs-extractor'
-	print '(c) 2013, Champaign-Urbana Mass Transit District'
-	print 'See the file LICENSE.txt for more information'
-
-	sys.stdout = old_out
-
-def help_text():
-	version_text()
-
-	old_out = sys.stdout
-	sys.stdout = sys.stderr
-
-	print
-	print "usage: %s [--verbose] input-directory output-directory route-id [route-id ...]" % sys.argv[0]
-
-	sys.stdout = old_out
-
 
 # process command-line arguments
 
-args = sys.argv
-verbose = False
+parser = argparse.ArgumentParser(description = 'Extract a GTFS feed that contains only some routes')
+parser.add_argument('-v', '--verbose', action = 'store_true',
+	help = 'narrate what\'s going on')
+parser.add_argument('--version', action = 'version',
+	version = 'extract.py %s' % script_version,
+	help = 'show version information and exit')
+parser.add_argument('input_directory', type = str,
+	help = 'directory containing input files')
+parser.add_argument('output_directory', type = str,
+	help = 'directory where output will be written')
+parser.add_argument('route_id', type = str, nargs = '+',
+	help = 'route(s) whose data should be included')
 
-if '-v' in args or '--version' in args:
-	version_text()
-	exit()
+args = parser.parse_args()
 
-if len(args) < 4 or '-h' in args or '--help' in args:
-	help_text()
-	exit()
+verbose = args.verbose
+input_directory = normalize_path(args.input_directory)
+output_directory = normalize_path(args.output_directory)
 
-if args[1] == '--verbose':
-	verbose = True
-	del args[1]
-
-input_directory = normalize_path(args[1])
-output_directory = normalize_path(args[2])
-
-routes = set(args[3:])
+routes = set(args.route_id)
 debug('Using routes "%s"' % '", "'.join(list(routes)))
 
 # create the output directory
@@ -84,7 +62,8 @@ if not os.path.exists(output_directory):
 	debug('Creating the directory "%s"' % output_directory)
 	os.mkdir(output_directory)
 
-files_to_copy = ['agency.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'feed_info.txt']
+files_to_copy = ['agency.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt',
+	'transfers.txt', 'feed_info.txt']
 
 for f in files_to_copy:
 	debug('Copying %s' % f)
