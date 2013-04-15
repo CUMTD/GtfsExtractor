@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description = 'Extract a GTFS feed that contain
 parser.add_argument('-v', '--verbose', action = 'store_true',
 	help = 'narrate what\'s going on')
 parser.add_argument('--version', action = 'version',
-	version = 'extract.py %s' % script_version,
+	version = 'GTFS Extractor %s' % script_version,
 	help = 'show version information and exit')
 parser.add_argument('input_directory', type = str,
 	help = 'directory containing input files')
