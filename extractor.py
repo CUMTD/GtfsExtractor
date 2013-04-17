@@ -45,7 +45,7 @@ parser.add_argument('input_directory', type = str,
 parser.add_argument('output_directory', type = str,
 	help = 'directory where output will be written')
 parser.add_argument('route_id', type = str, nargs = '+',
-	help = 'route(s) whose data should be included')
+	help = 'route(s) whose data should be included, or the keyword "all" to include all routes')
 
 args = parser.parse_args()
 
@@ -54,7 +54,11 @@ input_directory = normalize_path(args.input_directory)
 output_directory = normalize_path(args.output_directory)
 
 routes = set(args.route_id)
-debug('Using routes "%s"' % '", "'.join(list(routes)))
+all_routes = routes == {'all'}
+if all_routes:
+	debug('Using all routes')
+else:
+	debug('Using routes "%s"' % '", "'.join(list(routes)))
 
 # create the output directory
 
@@ -84,8 +88,12 @@ with open(input_directory + 'routes.txt') as routes_file:
 		if first_line:
 			new_routes_file += line
 			first_line = False
-		elif csv_field(line, 0) in routes:
-			new_routes_file += line
+		else:
+			if all_routes:
+				routes.add(csv_field(line, 0))
+				new_routes_file += line
+			elif csv_field(line, 0) in routes:
+				new_routes_file += line
 	
 	dump_to_file(new_routes_file, 'routes.txt')
 
