@@ -133,32 +133,38 @@ with open(input_directory + 'calendar.txt') as calendar_file:
 	dump_to_file(new_calendar_file, 'calendar.txt')
 
 debug('Processing calendar_dates.txt')
-with open(input_directory + 'calendar_dates.txt') as calendar_dates_file:
-	new_calendar_dates_file = ''
+try:
+	with open(input_directory + 'calendar_dates.txt') as calendar_dates_file:
+		new_calendar_dates_file = ''
 
-	first_line = True
-	for line in calendar_dates_file:
-		if first_line:
-			new_calendar_dates_file += line
-			first_line = False
-		elif csv_field(line, 0) in services:
-			new_calendar_dates_file += line
+		first_line = True
+		for line in calendar_dates_file:
+			if first_line:
+				new_calendar_dates_file += line
+				first_line = False
+			elif csv_field(line, 0) in services:
+				new_calendar_dates_file += line
 
-	dump_to_file(new_calendar_dates_file, 'calendar_dates.txt')
+		dump_to_file(new_calendar_dates_file, 'calendar_dates.txt')
+except IOError as e:
+	debug('    There is no calendar_dates.txt in the input')
 
 debug('Processing shapes.txt')
-with open(input_directory + 'shapes.txt') as shapes_file:
-	new_shapes_file = ''
+try:
+	with open(input_directory + 'shapes.txt') as shapes_file:
+		new_shapes_file = ''
 
-	first_line = True
-	for line in shapes_file:
-		if first_line:
-			new_shapes_file += line
-			first_line = False
-		elif csv_field(line, 0) in shapes:
-			new_shapes_file += line
+		first_line = True
+		for line in shapes_file:
+			if first_line:
+				new_shapes_file += line
+				first_line = False
+			elif csv_field(line, 0) in shapes:
+				new_shapes_file += line
 
-	dump_to_file(new_shapes_file, 'shapes.txt')
+		dump_to_file(new_shapes_file, 'shapes.txt')
+except IOError as e:
+	debug('    There is no shapes.txt in the input')
 
 stops = set()
 
