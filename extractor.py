@@ -7,9 +7,13 @@
 #
 # (c) 2013, Champaign-Urbana Mass Transit District
 # See the "License" section in the accompanying README.md for more information.
+#
+# https://github.com/CUMTD/GtfsExtractor
 
 import os, sys, shutil, re, argparse
 from os.path import abspath, expanduser
+from tempfile import mkdtemp
+from zipfile import ZipFile
 
 script_version = '0.8'
 verbose = False
@@ -18,7 +22,7 @@ verbose = False
 # utility functions
 
 def normalize_path(path):
-	return abspath(expanduser(path)) + '/'
+	return abspath(expanduser(path))
 
 def csv_field(line, field):
 	return re.sub(r'[\r\n]{1,2}$', '', line.split(',')[field])
@@ -34,24 +38,25 @@ def debug(text):
 
 # process command-line arguments
 
-parser = argparse.ArgumentParser(description = 'Extract a GTFS feed that contains only some routes')
+parser = argparse.ArgumentParser(description = 'Extract a GTFS feed that contains only some routes',
+	epilog = 'https://github.com/CUMTD/GtfsExtractor')
 parser.add_argument('-v', '--verbose', action = 'store_true',
 	help = 'narrate what\'s going on')
+parser.add_argument('-z', '--zip', action = 'store_true',
+	help = 'read from and write to ZIP files rather than directories')
 parser.add_argument('--version', action = 'version',
 	version = 'GTFS Extractor %s' % script_version,
 	help = 'show version information and exit')
-parser.add_argument('input_directory', type = str,
-	help = 'directory containing input files')
-parser.add_argument('output_directory', type = str,
-	help = 'directory where output will be written')
+parser.add_argument('input_path', type = str,
+	help = 'directory or zip file containing input files')
+parser.add_argument('output_path', type = str,
+	help = 'directory or zip file where output will be written')
 parser.add_argument('route_id', type = str, nargs = '+',
 	help = 'route(s) whose data should be included, or the keyword "all" to include all routes')
 
 args = parser.parse_args()
 
 verbose = args.verbose
-input_directory = normalize_path(args.input_directory)
-output_directory = normalize_path(args.output_directory)
 
 routes = set(args.route_id)
 all_routes = routes == {'all'}
@@ -59,6 +64,22 @@ if all_routes:
 	debug('Using all routes')
 else:
 	debug('Using routes "%s"' % '", "'.join(list(routes)))
+
+# if the input is a zip file, "convert" it to a directory first
+
+input_path = normalize_path(args.input_path)
+output_path = normalize_path(args.output_path)
+
+if args.zip:
+	input_directory = mkdtemp() + '/'
+	debug('Extracting %s to %s' % (input_path, input_directory))
+	with ZipFile(input_path, 'r') as z:
+		z.extractall(input_directory)
+	
+	output_directory = mkdtemp() + '/'
+else:
+	input_directory = input_path + '/'
+	output_directory = output_path + '/'
 
 # create the output directory
 
@@ -198,6 +219,19 @@ with open(input_directory + 'stops.txt') as stops_file:
 			new_stops_file += line
 
 	dump_to_file(new_stops_file, 'stops.txt')
+
+# write the output into a zip file if necessary
+
+if args.zip:
+	debug('Compressing %s to %s' % (output_directory, output_path))
+	with ZipFile(args.output_path, 'w') as z:
+		for root, dirs, files in os.walk(output_directory):
+			for file in files:
+				z.write(os.path.join(root, file), file)
+	
+	debug('Unlinking temporary directories')
+	shutil.rmtree(input_directory)
+	shutil.rmtree(output_directory)
 
 
 # vim: ts=4
