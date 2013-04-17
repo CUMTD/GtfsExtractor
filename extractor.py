@@ -24,8 +24,12 @@ verbose = False
 def normalize_path(path):
 	return abspath(expanduser(path))
 
+def fields_dict(line):
+	fields = line.split(',')
+	return {fields[i].rstrip(): i for i in range(len(fields))}
+
 def csv_field(line, field):
-	return re.sub(r'[\r\n]{1,2}$', '', line.split(',')[field])
+	return line.split(',')[field].rstrip()
 
 def dump_to_file(string, filename):
 	with open(output_directory + filename, 'w') as out_file:
@@ -107,13 +111,14 @@ with open(input_directory + 'routes.txt') as routes_file:
 	first_line = True
 	for line in routes_file:
 		if first_line:
+			fields = fields_dict(line)
 			new_routes_file += line
 			first_line = False
 		else:
 			if all_routes:
-				routes.add(csv_field(line, 0))
+				routes.add(csv_field(line, fields['route_id']))
 				new_routes_file += line
-			elif csv_field(line, 0) in routes:
+			elif csv_field(line, fields['route_id']) in routes:
 				new_routes_file += line
 	
 	dump_to_file(new_routes_file, 'routes.txt')
@@ -129,13 +134,14 @@ with open(input_directory + 'trips.txt') as trips_file:
 	first_line = True
 	for line in trips_file:
 		if first_line:
+			fields = fields_dict(line)
 			new_trips_file += line
 			first_line = False
-		elif csv_field(line, 0) in routes:
+		elif csv_field(line, fields['route_id']) in routes:
 			new_trips_file += line
-			services.add(csv_field(line, 1))
-			trips.add(csv_field(line, 2))
-			shapes.add(csv_field(line, 6))
+			services.add(csv_field(line, fields['service_id']))
+			trips.add(csv_field(line, fields['trip_id']))
+			shapes.add(csv_field(line, fields['shape_id']))
 	
 	dump_to_file(new_trips_file, 'trips.txt')
 
@@ -146,9 +152,10 @@ with open(input_directory + 'calendar.txt') as calendar_file:
 	first_line = True
 	for line in calendar_file:
 		if first_line:
+			fields = fields_dict(line)
 			new_calendar_file += line
 			first_line = False
-		elif csv_field(line, 0) in services:
+		elif csv_field(line, fields['service_id']) in services:
 			new_calendar_file += line
 
 	dump_to_file(new_calendar_file, 'calendar.txt')
@@ -161,9 +168,10 @@ try:
 		first_line = True
 		for line in calendar_dates_file:
 			if first_line:
+				fields = fields_dict(line)
 				new_calendar_dates_file += line
 				first_line = False
-			elif csv_field(line, 0) in services:
+			elif csv_field(line, fields['service_id']) in services:
 				new_calendar_dates_file += line
 
 		dump_to_file(new_calendar_dates_file, 'calendar_dates.txt')
@@ -178,9 +186,10 @@ try:
 		first_line = True
 		for line in shapes_file:
 			if first_line:
+				fields = fields_dict(line)
 				new_shapes_file += line
 				first_line = False
-			elif csv_field(line, 0) in shapes:
+			elif csv_field(line, fields['shape_id']) in shapes:
 				new_shapes_file += line
 
 		dump_to_file(new_shapes_file, 'shapes.txt')
@@ -196,11 +205,12 @@ with open(input_directory + 'stop_times.txt') as stop_times_file:
 	first_line = True
 	for line in stop_times_file:
 		if first_line:
+			fields = fields_dict(line)
 			new_stop_times_file += line
 			first_line = False
-		elif csv_field(line, 0) in trips:
+		elif csv_field(line, fields['trip_id']) in trips:
 			new_stop_times_file += line
-			stops.add(csv_field(line, 3))
+			stops.add(csv_field(line, fields['stop_id']))
 
 	dump_to_file(new_stop_times_file, 'stop_times.txt')
 
@@ -213,9 +223,10 @@ with open(input_directory + 'stops.txt') as stops_file:
 	first_line = True
 	for line in stops_file:
 		if first_line:
+			fields = fields_dict(line)
 			new_stops_file += line
 			first_line = False
-		elif csv_field(line, 0) in stops or csv_field(line, 0) in parent_stops:
+		elif csv_field(line, fields['stop_id']) in stops or csv_field(line, fields['stop_id']) in parent_stops:
 			new_stops_file += line
 
 	dump_to_file(new_stops_file, 'stops.txt')
