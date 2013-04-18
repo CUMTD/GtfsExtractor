@@ -114,6 +114,8 @@ with open(input_directory + 'routes.txt') as routes_file:
 			fields = fields_dict(line)
 			new_routes_file += line
 			first_line = False
+		elif line.rstrip() == '':
+			next
 		else:
 			if all_routes:
 				routes.add(csv_field(line, fields['route_id']))
@@ -137,6 +139,8 @@ with open(input_directory + 'trips.txt') as trips_file:
 			fields = fields_dict(line)
 			new_trips_file += line
 			first_line = False
+		elif line.rstrip() == '':
+			next
 		elif csv_field(line, fields['route_id']) in routes:
 			new_trips_file += line
 			services.add(csv_field(line, fields['service_id']))
@@ -155,6 +159,8 @@ with open(input_directory + 'calendar.txt') as calendar_file:
 			fields = fields_dict(line)
 			new_calendar_file += line
 			first_line = False
+		elif line.rstrip() == '':
+			next
 		elif csv_field(line, fields['service_id']) in services:
 			new_calendar_file += line
 
@@ -171,6 +177,8 @@ try:
 				fields = fields_dict(line)
 				new_calendar_dates_file += line
 				first_line = False
+			elif line.rstrip() == '':
+				next
 			elif csv_field(line, fields['service_id']) in services:
 				new_calendar_dates_file += line
 
@@ -189,6 +197,8 @@ try:
 				fields = fields_dict(line)
 				new_shapes_file += line
 				first_line = False
+			elif line.rstrip() == '':
+				next
 			elif csv_field(line, fields['shape_id']) in shapes:
 				new_shapes_file += line
 
@@ -208,6 +218,8 @@ with open(input_directory + 'stop_times.txt') as stop_times_file:
 			fields = fields_dict(line)
 			new_stop_times_file += line
 			first_line = False
+		elif line.rstrip() == '':
+			next
 		elif csv_field(line, fields['trip_id']) in trips:
 			new_stop_times_file += line
 			stops.add(csv_field(line, fields['stop_id']))
@@ -226,6 +238,8 @@ with open(input_directory + 'stops.txt') as stops_file:
 			fields = fields_dict(line)
 			new_stops_file += line
 			first_line = False
+		elif line.rstrip() == '':
+			next
 		elif csv_field(line, fields['stop_id']) in stops or csv_field(line, fields['stop_id']) in parent_stops:
 			new_stops_file += line
 
