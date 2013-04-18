@@ -13,7 +13,7 @@
 import os, sys, shutil, re, argparse
 from os.path import abspath, expanduser
 from tempfile import mkdtemp
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 script_version = '0.8'
 verbose = False
@@ -343,7 +343,7 @@ except IOError as e:
 
 if args.zip:
 	debug('Compressing %s to %s' % (output_directory, output_path))
-	with ZipFile(args.output_path, 'w') as z:
+	with ZipFile(args.output_path, 'w', ZIP_DEFLATED) as z:
 		for root, dirs, files in os.walk(output_directory):
 			for file in files:
 				z.write(os.path.join(root, file), file)
