@@ -4,7 +4,7 @@ Given a [GTFS feed](https://developers.google.com/transit/gtfs/reference) and a 
 
 ## Why is this useful?
 
-The GTFS feed for even a smaller transit agency can consist of hundreds of thousands of lines of text. Testing the GTFS-related parts of a transit workflow doesn't generally require you to use a *full* data set, just a *coherent* data set--one in which, for example, all of the stops mentioned in the `stop_times` file are properly defined in the `stops` file. This script takes a list of routes as input and pulls out just those parts of your GTFS feed that are actually referred to by those routes. This can result in a significant space savings:
+The GTFS feed for even a smaller transit agency can consist of hundreds of thousands of lines of text. Testing the GTFS-related parts of a transit workflow doesn't generally require you to use a *full* data set, just a *coherent* data set--one in which, for example, all of the stops mentioned in the `stop_times` file are properly defined in the `stops` file. This script takes a list of routes as input and pulls out just those parts of your GTFS feed that are actually referred to by those routes. This can result in a significant space savings; for the [CUMTD GTFS feed](http://developer.cumtd.com/) we saw the following changes:
 
 <table>
 	<thead>	
@@ -73,7 +73,7 @@ The GTFS feed for even a smaller transit agency can consist of hundreds of thous
 	</tbody>
 </table>
 
-Of course, your results will vary.
+Of course, your results will vary, but the changes in disk usage (and the corresponding changes in RAM usage) are clear.
 
 ## Usage
 

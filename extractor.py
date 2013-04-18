@@ -91,8 +91,7 @@ if not os.path.exists(output_directory):
 	debug('Creating the directory "%s"' % output_directory)
 	os.mkdir(output_directory)
 
-files_to_copy = ['agency.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt',
-	'transfers.txt', 'feed_info.txt']
+files_to_copy = ['agency.txt', 'feed_info.txt']
 
 for f in files_to_copy:
 	debug('Copying %s' % f)
@@ -186,6 +185,26 @@ try:
 except IOError as e:
 	debug('    There is no calendar_dates.txt in the input')
 
+debug('Processing frequencies.txt')
+try:
+	with open(input_directory + 'frequencies.txt') as frequencies_file:
+		new_frequencies_file = ''
+
+		first_line = True
+		for line in frequencies_file:
+			if first_line:
+				fields = fields_dict(line)
+				new_frequencies_file += line
+				first_line = False
+			elif line.rstrip() == '':
+				next
+			elif csv_field(line, fields['trip_id']) in services:
+				new_frequencies_file += line
+
+		dump_to_file(new_frequencies_file, 'frequencies.txt')
+except IOError as e:
+	debug('    There is no frequencies.txt in the input')
+
 debug('Processing shapes.txt')
 try:
 	with open(input_directory + 'shapes.txt') as shapes_file:
@@ -228,6 +247,7 @@ with open(input_directory + 'stop_times.txt') as stop_times_file:
 
 parent_stops = {re.sub(r':[0-9]+', '', stop) for stop in stops}
 all_stops = stops.union(parent_stops)
+zone_ids = set()
 
 debug('Processing stops.txt')
 with open(input_directory + 'stops.txt') as stops_file:
@@ -244,6 +264,7 @@ with open(input_directory + 'stops.txt') as stops_file:
 			next
 		elif csv_field(line, fields['stop_id']) in all_stops:
 			new_stops_file += line
+			zone_ids.add(csv_field(line, fields['zone_id']))
 			if 'parent_station' in fields and csv_field(line, fields['parent_station']) != '':
 				parent_stations.add(csv_field(line, fields['parent_station']))
 	
@@ -253,6 +274,70 @@ with open(input_directory + 'stops.txt') as stops_file:
 			new_stops_file += line
 
 	dump_to_file(new_stops_file, 'stops.txt')
+
+fare_ids = set()
+
+debug('Processing fare_rules.txt')
+try:
+	with open(input_directory + 'fare_rules.txt') as fare_rules_file:
+		new_fare_rules_file = ''
+
+		first_line = True
+		for line in fare_rules_file:
+			if first_line:
+				fields = fields_dict(line)
+				new_fare_rules_file += line
+				first_line = False
+			elif line.rstrip() == '':
+				next
+			elif (csv_field(line, fields['route_id']) != '' and csv_field(line, fields['route_id']) in routes) or (csv_field(line, fields['route_id']) == '' and (csv_field(line, fields['origin_id']) in zone_ids or csv_field(line, fields['destination_id']) in zone_ids or csv_field(line, fields['contains_id']) in zone_ids)):
+				new_fare_rules_file += line
+				fare_ids.add(csv_field(line, fields['fare_id']))
+
+		dump_to_file(new_fare_rules_file, 'fare_rules.txt')
+except IOError as e:
+	debug('    There is no fare_rules.txt in the input')
+
+debug('Processing fare_attributes.txt')
+try:
+	with open(input_directory + 'fare_attributes.txt') as fare_attributes_file:
+		new_fare_attributes_file = ''
+
+		first_line = True
+		for line in fare_attributes_file:
+			if first_line:
+				fields = fields_dict(line)
+				new_fare_attributes_file += line
+				first_line = False
+			elif line.rstrip() == '':
+				next
+			elif csv_field(line, fields['fare_id']) in fare_ids:
+				new_fare_attributes_file += line
+		
+		dump_to_file(new_fare_attributes_file, 'fare_attributes.txt')
+except IOError as e:
+	debug('    There is no fare_attributes.txt in the input')
+
+debug('Processing transfers.txt')
+try:
+	with open(input_directory + 'transfers.txt') as transfers_file:
+		new_transfers_file = ''
+
+		first_line = True
+		for line in transfers_file:
+			if first_line:
+				fields = fields_dict(line)
+				new_transfers_file += line
+				first_line = False
+			elif line.rstrip() == '':
+				next
+			elif csv_field(line, fields['from_stop_id']) in all_stops and csv_field(line, fields['to_stop_id']):
+				new_transfers_file += line
+		
+		dump_to_file(new_transfers_file, 'transfers.txt')
+except IOError as e:
+	debug('    There is no transfers.txt in the input')
+		
 
 # write the output into a zip file if necessary
 
