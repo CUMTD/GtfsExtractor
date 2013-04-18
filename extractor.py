@@ -227,10 +227,12 @@ with open(input_directory + 'stop_times.txt') as stop_times_file:
 	dump_to_file(new_stop_times_file, 'stop_times.txt')
 
 parent_stops = {re.sub(r':[0-9]+', '', stop) for stop in stops}
+all_stops = stops.union(parent_stops)
 
 debug('Processing stops.txt')
 with open(input_directory + 'stops.txt') as stops_file:
 	new_stops_file = ''
+	parent_stations = set()
 
 	first_line = True
 	for line in stops_file:
@@ -240,7 +242,14 @@ with open(input_directory + 'stops.txt') as stops_file:
 			first_line = False
 		elif line.rstrip() == '':
 			next
-		elif csv_field(line, fields['stop_id']) in stops or csv_field(line, fields['stop_id']) in parent_stops:
+		elif csv_field(line, fields['stop_id']) in all_stops:
+			new_stops_file += line
+			if 'parent_station' in fields and csv_field(line, fields['parent_station']) != '':
+				parent_stations.add(csv_field(line, fields['parent_station']))
+	
+	stops_file.seek(0)
+	for line in stops_file:
+		if csv_field(line, fields['stop_id']) in parent_stations:
 			new_stops_file += line
 
 	dump_to_file(new_stops_file, 'stops.txt')
